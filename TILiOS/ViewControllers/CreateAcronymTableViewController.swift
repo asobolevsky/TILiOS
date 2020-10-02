@@ -43,7 +43,14 @@ class CreateAcronymTableViewController: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     acronymShortTextField.becomeFirstResponder()
-    obtainUser()
+    if let existingAcronym = acronym {
+      acronymShortTextField.text = existingAcronym.short
+      acronymLongTextField.text = existingAcronym.long
+      userLabel.text = selectedUser?.name
+      navigationItem.title = "Edit Acronym"
+    } else {
+      obtainUser()
+    }
   }
   
   func obtainUser() {
@@ -103,6 +110,28 @@ class CreateAcronymTableViewController: UITableViewController {
     
     let acronym = Acronym(short: short, long: long, userID: userID)
     let acronymData = acronym.toCreateData()
+    if self.acronym != nil {
+      guard let existingID = self.acronym?.id else {
+        let message = "There was an error updating the acronym"
+        ErrorPresenter.showError(message: message, on: self)
+        return
+      }
+      
+      updateAcronym(id: existingID, data: acronymData)
+    } else {
+      saveAcronym(data: acronymData)
+    }
+  }
+  
+  @IBAction func updateSelectedUser(_ segue: UIStoryboardSegue) {
+    guard let controller = segue.source as? SelectUserTableViewController else {
+      return
+    }
+    selectedUser = controller.selectedUser
+    userLabel.text = selectedUser?.name
+  }
+  
+  private func saveAcronym(data acronymData: CreateAcronymData) {
     ResourceRequest<Acronym>(resourcePath: ResourcePaths.acronyms).saveData(acronymData) { [weak self] result in
       switch result {
       case .failure:
@@ -116,11 +145,18 @@ class CreateAcronymTableViewController: UITableViewController {
     }
   }
   
-  @IBAction func updateSelectedUser(_ segue: UIStoryboardSegue) {
-    guard let controller = segue.source as? SelectUserTableViewController else {
-      return
+  private func updateAcronym(id: UUID, data acronymData: CreateAcronymData) {
+    AcronymRequest(acronymID: id).update(with: acronymData) { [weak self] result in
+      switch result {
+      case .failure:
+        ErrorPresenter.showError(message: "There was a problem updating the acronym", on: self)
+        
+      case .success(let updatedAcronym):
+        self?.acronym = updatedAcronym
+        DispatchQueue.main.async { [weak self] in
+          self?.navigationController?.popViewController(animated: true)
+        }
+      }
     }
-    selectedUser = controller.selectedUser
-    userLabel.text = selectedUser?.name
   }
 }

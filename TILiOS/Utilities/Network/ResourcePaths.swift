@@ -29,6 +29,8 @@
 import Foundation
 
 struct ResourcePaths {
+  static let base = "http://localhost:8080/api"
+  
   static let acronyms = "acronyms"
   static let categories = "categories"
   static let users = "users"

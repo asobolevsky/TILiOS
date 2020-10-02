@@ -47,7 +47,12 @@ class AcronymsTableViewController: UITableViewController {
   
   // MARK: - Navigation
   @IBSegueAction func makeAcronymsDetailTableViewController(_ coder: NSCoder) -> AcronymDetailTableViewController? {
-    return nil
+    guard let indexPath = tableView.indexPathForSelectedRow else {
+      return nil
+    }
+    
+    let acronym = acronyms[indexPath.row]
+    return AcronymDetailTableViewController(coder: coder, acronym: acronym)
   }
   
   // MARK: - IBActions

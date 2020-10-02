@@ -29,11 +29,10 @@
 import Foundation
 
 struct ResourceRequest<ResourceType> where ResourceType: Codable {
-  let baseURLString = "http://localhost:8080/api"
-  let resourceURL: URL
+  private let resourceURL: URL
   
   init(resourcePath: String) {
-    guard let baseURL = URL(string: baseURLString) else {
+    guard let baseURL = URL(string: ResourcePaths.base) else {
       fatalError("Could not convert baseURLString to baseURL")
     }
     self.resourceURL = baseURL.appendingPathComponent(resourcePath)
@@ -52,6 +51,28 @@ struct ResourceRequest<ResourceType> where ResourceType: Codable {
         } catch {
           completion(.failure(.decodingError))
         }
+      }
+    dataTask.resume()
+  }
+  
+  func getWithID(
+    _ id: String,
+    completion: @escaping (Result<ResourceType, ResourceRequestError>) -> Void
+  ) {
+    let url = resourceURL.appendingPathComponent(id)
+    let dataTask = URLSession.shared
+      .dataTask(with: url) { data, _, _ in
+        guard let jsonData = data else {
+          completion(.failure(.noData))
+          return
+        }
+        do {
+          let resources = try JSONDecoder().decode(ResourceType.self, from: jsonData)
+          completion(.success(resources))
+        } catch {
+          completion(.failure(.decodingError))
+        }
+        
       }
     dataTask.resume()
   }

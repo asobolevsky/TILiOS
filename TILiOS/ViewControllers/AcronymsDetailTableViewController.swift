@@ -35,64 +35,104 @@ class AcronymDetailTableViewController: UITableViewController {
       updateAcronymView()
     }
   }
-
+  
   var user: User? {
     didSet {
       updateAcronymView()
     }
   }
-
+  
   var categories: [Category] {
     didSet {
       updateAcronymView()
     }
   }
-
+  
   // MARK: - Initializers
   required init?(coder: NSCoder) {
     fatalError("init(coder:) is not implemented")
   }
-
+  
   init?(coder: NSCoder, acronym: Acronym) {
     self.acronym = acronym
     self.categories = []
     super.init(coder: coder)
   }
-
+  
   // MARK: - View Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
     navigationController?.navigationBar.prefersLargeTitles = false
     getAcronymData()
   }
-
+  
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     getAcronymData()
   }
-
+  
   // MARK: - Model Loading
-
+  
   func getAcronymData() {
+    guard let id = acronym.id else {
+      return
+    }
+    
+    let acrononymRequest = AcronymRequest(acronymID: id)
+    acrononymRequest.getUser { [weak self] result in
+      switch result {
+      case .failure:
+        let message = "There was an error getting acronym's user"
+        ErrorPresenter.showError(message: message, on: self)
+        
+      case .success(let user):
+        self?.user = user
+      }
+    }
+    
+    acrononymRequest.getCategories { [weak self] result in
+      switch result {
+      case .failure:
+        let message = "There was an error getting acronym's categories"
+        ErrorPresenter.showError(message: message, on: self)
+        
+      case .success(let categories):
+        self?.categories = categories
+      }
+    }
   }
-
+  
   func updateAcronymView() {
     DispatchQueue.main.async { [weak self] in
       self?.tableView.reloadData()
     }
   }
-
+  
   // MARK: - Navigation
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    if segue.identifier == "EditAcronymSegue" {
+      guard let controller = segue.destination as? CreateAcronymTableViewController else {
+        return
+      }
+      controller.acronym = acronym
+      controller.selectedUser = user
+    }
   }
-
+  
   @IBSegueAction func makeAddToCategoryController(_ coder: NSCoder) -> AddToCategoryTableViewController? {
     return nil
   }
-
-
+  
+  
   // MARK: - IBActions
   @IBAction func updateAcronymDetails(_ segue: UIStoryboardSegue) {
+      guard
+        let controller = segue.source as? CreateAcronymTableViewController,
+        let updatedAcronym = controller.acronym
+      else {
+        return
+      }
+      self.acronym = updatedAcronym
   }
 }
 
@@ -101,11 +141,11 @@ extension AcronymDetailTableViewController {
   override func numberOfSections(in tableView: UITableView) -> Int {
     return 4
   }
-
+  
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return section == 3 ? categories.count : 1
   }
-
+  
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "AcronymDetailCell", for: indexPath)
     switch indexPath.section {
@@ -122,7 +162,7 @@ extension AcronymDetailTableViewController {
     }
     return cell
   }
-
+  
   override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     switch section {
     case 0:
