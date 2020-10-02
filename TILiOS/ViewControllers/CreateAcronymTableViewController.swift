@@ -154,7 +154,7 @@ class CreateAcronymTableViewController: UITableViewController {
       case .success(let updatedAcronym):
         self?.acronym = updatedAcronym
         DispatchQueue.main.async { [weak self] in
-          self?.navigationController?.popViewController(animated: true)
+          self?.performSegue(withIdentifier: "UpdateAcronymDetails", sender: nil)
         }
       }
     }

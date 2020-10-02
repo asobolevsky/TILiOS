@@ -192,8 +192,7 @@
                         <outlet property="acronymLongTextField" destination="LM7-Jv-qh1" id="MZ8-kC-nW0"/>
                         <outlet property="acronymShortTextField" destination="4Yy-6S-PrT" id="UCi-Ut-9nh"/>
                         <outlet property="userLabel" destination="YJQ-0p-NK4" id="OT2-E1-DaO"/>
-                        <segue destination="Zcc-sE-Ui9" kind="unwind" unwindAction="updateAcronymDetails:" id="nun-pk-U3U"/>
-                        <segue destination="AUL-0k-Yun" kind="unwind" unwindAction="updateAcronymDetails:" id="33c-Eh-AfP"/>
+                        <segue destination="AUL-0k-Yun" kind="unwind" identifier="UpdateAcronymDetails" unwindAction="updateAcronymDetails:" id="33c-Eh-AfP"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KXQ-Qx-jqg" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -287,7 +286,6 @@
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0oY-8G-0Uc" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="Zcc-sE-Ui9" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="2340" y="-769"/>
         </scene>
